@@ -1,0 +1,16 @@
+{
+  "id": "6g11bumf",
+  "kind": "versus",
+  "variant": "yield-tr-er",
+  "syms": [
+    "SCHD",
+    "VYM",
+    "DGRO",
+    "HDV",
+    "VIG"
+  ],
+  "images": 0,
+  "text": "SCHD vs VYM vs DGRO vs HDV vs VIG\n\nYield\nSCHD 3.0%\nVYM 2.5%\nDGRO 2.0%\nHDV 3.3%\nVIG 1.6%\n\nTotal return since launch\nSCHD +539%\nVYM +470%\nDGRO +310%\nHDV +380%\nVIG +605%\n\nExpense ratio\nSCHD 0.06%\nVYM 0.04%\nDGRO 0.08%\nHDV 0.08%\nVIG 0.04%",
+  "post_at": "2026-09-28T12:00:00.000Z",
+  "created_at": "2026-09-27T21:48:48.207Z"
+}
