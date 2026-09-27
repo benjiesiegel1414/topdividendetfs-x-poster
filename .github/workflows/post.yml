@@ -1,0 +1,46 @@
+name: Post to X
+
+on:
+  # cron-job.org triggers this every 30 minutes (GitHub's own schedule skips runs).
+  # The schedule below is only a backup.
+  workflow_dispatch:
+    inputs:
+      check_only:
+        description: "Connection test only (posts nothing)"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "12,42 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: x-poster
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Post what's due
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          X_EXPECTED_HANDLE: ${{ vars.X_EXPECTED_HANDLE || 'TopDividendETFs' }}
+        run: |
+          git config user.name "topdividendetfs-x-poster"
+          git config user.email "actions@users.noreply.github.com"
+          if [ "${{ inputs.check_only }}" = "true" ]; then
+            python scripts/post.py --check
+          else
+            python scripts/post.py
+          fi
