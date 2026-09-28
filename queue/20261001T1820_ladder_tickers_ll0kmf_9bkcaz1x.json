@@ -1,0 +1,23 @@
+{
+  "id": "9bkcaz1x",
+  "kind": "ladder",
+  "variant": "tickers",
+  "syms": [
+    "NOBL",
+    "FDVV",
+    "HDV",
+    "IDV",
+    "KNG",
+    "FTHI",
+    "ISPY",
+    "QYLD",
+    "QQQI",
+    "IWMI",
+    "SVOL",
+    "XQQI"
+  ],
+  "images": 0,
+  "text": "The dividend ETF yield ladder 🪜\n\nNOBL 2.1%\nFDVV 2.8%\nHDV 3.3%\nIDV 4.8%\nKNG 8.0%\nFTHI 9.0%\nISPY 10.0%\nQYLD 12.4%\nQQQI 14.0%\nIWMI 14.4%\nSVOL 20.0%\nXQQI 21.0%\n\nLow yield usually means more growth, high yield usually means more options income",
+  "post_at": "2026-10-01T18:20:00.000Z",
+  "created_at": "2026-09-28T00:19:21.647Z"
+}
