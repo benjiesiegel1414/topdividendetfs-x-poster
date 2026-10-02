@@ -187,7 +187,7 @@ def top_voted_text(rows):
     for i, (sym, n) in enumerate(rows, 1):
         lines.append(f"{MEDALS.get(i, f'#{i}')} {sym} {n} vote{'' if n == 1 else 's'}")
     return ("This week’s top voted income ETFs 🏆\n\n" + "\n".join(lines) +
-            "\n\nGO VOTE 🗳️ " + TOPVOTED_LINK)
+            "\n\nGO VOTE 🗳️")
 
 
 def queue_top_voted():
