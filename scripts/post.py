@@ -137,9 +137,101 @@ def move(json_path, record, folder):
             os.remove(p)
 
 
+
+# ---------------------------------------------------------------------------
+# Daily "top voted ETFs" post
+# Every day at 1:00 PM Eastern this builds a post from the live vote totals on
+# topdividendetfs.com/top-voted-etfs.html and drops it into queue/, then the
+# normal flow below posts it. One per day: if one already exists for today in
+# queue/, posted/ or failed/ nothing new is made. Turn it off by setting the
+# repo variable TOPVOTED_ENABLED to "false".
+# ---------------------------------------------------------------------------
+TOPVOTED_ENABLED = (os.environ.get("TOPVOTED_ENABLED") or "true").lower() != "false"
+TOPVOTED_HOUR_ET = 13          # 1:00 PM Eastern
+TOPVOTED_LAST_HOUR_ET = 17     # if every run before 5 PM failed, skip that day
+TOPVOTED_CSV = ("https://docs.google.com/spreadsheets/d/e/2PACX-1vRYVQtSlWkwIDCeeB-YaQEpelovyW9ofaItXrzXZ_"
+                "ntodK4QasRTKhP-swVWISmXIDZTIvQlbvNZm_o/pub?output=csv")
+TOPVOTED_VOTES = ("https://script.google.com/macros/s/AKfycbwiuyy8aUNB3tNKouJ18zxE8r8nuiCTk3lG9PCYeqEQndImu_"
+                  "8915rNHudiayXtFNbi/exec?action=getAll")
+TOPVOTED_LINK = "https://topdividendetfs.com"
+MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
+
+
+def top_voted(n=10):
+    """Same join and ranking as the top-voted page: sheet tickers + live votes, most votes first."""
+    import csv
+    import io
+    import re
+    stamp = int(time.time())
+    c = requests.get(f"{TOPVOTED_CSV}&t={stamp}", timeout=60)
+    c.raise_for_status()
+    v = requests.get(f"{TOPVOTED_VOTES}&t={stamp}", timeout=90)
+    v.raise_for_status()
+    votes = {str(k).strip().upper(): int(x) for k, x in v.json().items() if str(x).strip().lstrip("-").isdigit()}
+    seen, rows = set(), []
+    for i, row in enumerate(csv.reader(io.StringIO(c.content.decode("utf-8-sig")))):
+        if i == 0 or len(row) < 6:
+            continue
+        sym, name = row[0].strip().upper(), row[1].strip()
+        if not sym or not name or not re.fullmatch(r"[A-Z][A-Z.\-]{0,5}", sym) or sym in seen:
+            continue
+        seen.add(sym)
+        rows.append((sym, votes.get(sym, 0)))
+    rows = [r for r in rows if r[1] > 0]
+    rows.sort(key=lambda r: (-r[1], r[0]))
+    return rows[:n]
+
+
+def top_voted_text(rows):
+    lines = []
+    for i, (sym, n) in enumerate(rows, 1):
+        lines.append(f"{MEDALS.get(i, f'#{i}')} {sym} {n} vote{'' if n == 1 else 's'}")
+    return ("This week’s top voted income ETFs 🏆\n\n" + "\n".join(lines) +
+            "\n\nVotes now reset 🔄\n\nGO VOTE 🗳️ " + TOPVOTED_LINK)
+
+
+def queue_top_voted():
+    if not TOPVOTED_ENABLED:
+        return
+    from zoneinfo import ZoneInfo
+    et = now().astimezone(ZoneInfo("America/New_York"))
+    if not (TOPVOTED_HOUR_ET <= et.hour < TOPVOTED_LAST_HOUR_ET) and not (
+            et.hour == TOPVOTED_HOUR_ET - 1 and et.minute >= 57):
+        return
+    day = et.strftime("%Y%m%d")
+    if any(glob.glob(f"{d}/*_topvoted_daily_{day}_*.json") for d in ("queue", "posted", "failed")):
+        return
+    try:
+        rows = top_voted()
+    except Exception as e:
+        print(f"Top voted: could not read the vote totals, will try next run: {e}")
+        return
+    if len(rows) < 5:
+        print(f"Top voted: only {len(rows)} ETFs have votes right now, will try next run")
+        return
+    due = et.replace(hour=TOPVOTED_HOUR_ET, minute=0, second=0, microsecond=0).astimezone(timezone.utc)
+    rec = {
+        "id": f"tv{day}",
+        "kind": "topvoted",
+        "variant": "daily",
+        "syms": [s for s, _ in rows],
+        "images": 0,
+        "text": top_voted_text(rows),
+        "post_at": due.strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+        "created_at": now().strftime("%Y-%m-%dT%H:%M:%S.000Z"),
+        "auto": True,
+    }
+    path = f"queue/{due.strftime('%Y%m%dT%H%M')}_topvoted_daily_{day}_tv{day}.json"
+    with open(path, "w") as fh:
+        json.dump(rec, fh, indent=2, ensure_ascii=False)
+    save_and_push(f"Queued daily top voted post {day}")
+    print(f"Top voted: queued {path}")
+
+
 def main():
     os.makedirs("posted", exist_ok=True)
     os.makedirs("failed", exist_ok=True)
+    queue_top_voted()
     due = []
     for path in sorted(glob.glob("queue/*.json")):
         try:
