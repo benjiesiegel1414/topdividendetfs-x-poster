@@ -232,6 +232,11 @@ def main():
     os.makedirs("posted", exist_ok=True)
     os.makedirs("failed", exist_ok=True)
     queue_top_voted()
+    try:
+        from weekly_winners import queue_weekly_winners
+        queue_weekly_winners(save_and_push, TOPVOTED_CSV, TOPVOTED_VOTES)
+    except Exception as e:
+        print(f"Weekly winners: skipped this run: {e}")
     due = []
     for path in sorted(glob.glob("queue/*.json")):
         try:
