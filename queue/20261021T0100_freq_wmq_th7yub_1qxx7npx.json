@@ -1,0 +1,23 @@
+{
+  "id": "1qxx7npx",
+  "kind": "freq",
+  "variant": "wmq",
+  "syms": [
+    "XDTE",
+    "QDTE",
+    "RDTE",
+    "GOOY",
+    "QDPL",
+    "DIVO",
+    "QYLD",
+    "TSPY",
+    "SCHG",
+    "VIG",
+    "FDVV",
+    "DVY"
+  ],
+  "images": 0,
+  "text": "How often your ETF pays you 📅\n\nWeekly\nXDTE 14.9%\nQDTE 19.9%\nRDTE 20.4%\nGOOY 25.0%\n\nMonthly\nQDPL 4.6%\nDIVO 4.9%\nQYLD 11.1%\nTSPY 13.9%\n\nQuarterly\nSCHG 0.4%\nVIG 1.4%\nFDVV 2.7%\nDVY 3.2%",
+  "post_at": "2026-10-21T01:00:00.000Z",
+  "created_at": "2026-10-14T03:08:23.472Z"
+}
